@@ -1,0 +1,91 @@
+# The OpenFOAM implementation of PartCAD's flow analysis.
+#
+# The structure is identical to `//builtin/export` and `//builtin/render` -- see
+# `docs/source/config_output.rst` in the `partcad` repository for what each field
+# means. What makes it an analysis is the section it is declared in: `cae:`.
+#
+# A `cae:` file type differs from an export or a render in three ways:
+#
+#   * `extension:` is required. Which model format an analysis writes is the
+#     implementation's decision; this one writes binary glTF, because the result
+#     is a 3D field and glTF is what the PartCAD Viewer turns and zooms.
+#   * The implementation is handed the part's boundary conditions: `analysis`,
+#     the `cfd:` keys (`load` in newtons, `outlet`, `fix`), and `boundary` -- the
+#     ports each condition landed on, with the faces of the part each covers.
+#   * It answers with `findings` beside `success`: what the analysis has to say
+#     about the part. An empty list is a pass, and is what `pc test` requires.
+
+name: //pub/feature/cae/openfoam
+desc: |
+  Steady, laminar, incompressible flow analysis, by
+  [OpenFOAM](https://www.openfoam.com/).
+
+  The part is the fluid volume. Its inlets are driven by a pressure (the `load:`
+  of the port over the area its sketch covers), its outlets are held at the
+  reference pressure, and every other surface is a no-slip wall. The result is
+  the boundary coloured by pressure, and the flow rate, speeds and Reynolds
+  number as measurements.
+
+# What the script imports. Declared even though the image carries them, because
+# `dockerImage` says where the analysis runs *best*, not where it runs at all: a
+# host with OpenFOAM installed runs this package in a conda or venv sandbox like
+# any other, and only a package that declares its requirements works there.
+#
+# OpenFOAM itself is not here and cannot be: it is a native toolchain, not a
+# Python package. That is what the image is for -- or a local installation,
+# found as `openfoam_common.find_bashrc()` describes.
+pythonRequirements:
+  - gmsh; platform_machine != "aarch64"
+  - numpy
+
+cae:
+  cfd:
+    desc: Steady laminar incompressible flow through the part, as a glTF coloured by pressure plus findings.
+    path: cfd_openfoam.py
+    extension: glb
+    # Where the analysis runs best, and the reason this package can promise to
+    # work on a machine that has nothing installed: Debian's OpenFOAM and gmsh,
+    # for amd64 and arm64 alike. The tag is a hash of what the image is built
+    # from (see `image-tag.sh`), and PartCAD appends the architecture.
+    dockerImage: ghcr.io/partcad/partcad-cae-openfoam:e8822e84b375
+    # How long a solve may be silent before PartCAD's client gives up on it, in
+    # seconds: a flow is the slowest analysis there is, and the client's default
+    # is five minutes. PartCAD announces this window while the analysis runs.
+    timeout: 1800
+
+    # Every field below is a parameter of this implementation, handed to the
+    # script as it stands. A package re-tunes any of them in a `cae:` section of
+    # its own, and one object overrides them again in its own.
+
+    # How fine the mesh is: the largest tetrahedron, as a fraction of the part's
+    # largest dimension. Coarse by default, as every PartCAD analysis is: a duct
+    # whose bore is a tenth of its length wants 0.01 or less, and says so in its
+    # own `cae:` section.
+    mesh_size: 0.05
+
+    # The fluid. Air at 20 degrees; `density` in kg/m^3 and `viscosity` the
+    # dynamic viscosity in Pa*s. Note the `+`/`-` in the exponents: YAML 1.1 reads
+    # `1.82e-5` as a number only with a decimal point and a signed exponent.
+    density: 1.204
+    viscosity: 1.82e-5
+
+    # The solver. `iterations` is how many SIMPLE steps it may take to settle;
+    # `residual` is how small the initial residuals have to be for it to count as
+    # settled. Not settling is a finding, never a quiet answer.
+    iterations: 2000
+    residual: 1.0e-6
+
+    # Whether the tetrahedra gmsh makes are turned into their dual polyhedra
+    # before the solve. A cell-centred solver is poor on raw tetrahedra -- 13%
+    # low on the example pipe's flow rate, against 0.4% on the dual of the same
+    # mesh -- so this is on, and `feature_angle` is the angle in degrees past
+    # which an edge of the part is kept sharp in the dual.
+    poly_dual: true
+    feature_angle: 70
+
+    # What counts as a finding, besides a flow that did not settle and a flow
+    # too fast to be laminar: a speed past which the geometry is not doing what
+    # it was meant to (m/s), and, when set, a flow rate the part has to reach
+    # (m^3/s).
+    max_velocity: 50.0
+    # min_flow_rate: 1.0e-6
