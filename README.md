@@ -54,7 +54,7 @@ is exactly as large as its sketch. A port with no sketch covers the face it lies
 
 What comes back:
 
-* `<part>.cfd.glb`, the part's boundary coloured by pressure, which the PartCAD Viewer's CFD tab shows;
+* `<part>.cfd.glb`, the part's boundary coloured by pressure, which the Digital Thread's CFD tab shows;
 * a measurement line in the log -- flow rate, mean outlet speed, peak speed, Reynolds number, the
   pressure each inlet was driven at, cell count, iterations to a steady state;
 * **findings**, which fail `pc test`: a flow that did not settle, a flow fast enough to be turbulent

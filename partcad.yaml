@@ -8,7 +8,7 @@
 #
 #   * `extension:` is required. Which model format an analysis writes is the
 #     implementation's decision; this one writes binary glTF, because the result
-#     is a 3D field and glTF is what the PartCAD Viewer turns and zooms.
+#     is a 3D field and glTF is what the Digital Thread turns and zooms.
 #   * The implementation is handed the part's boundary conditions: `analysis`,
 #     the `cfd:` keys (`load` in newtons, `outlet`, `fix`), and `boundary` -- the
 #     ports each condition landed on, with the faces of the part each covers.
