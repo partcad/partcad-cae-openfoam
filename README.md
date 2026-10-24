@@ -5,6 +5,7 @@ Steady, laminar, incompressible flow analysis for [PartCAD](https://github.com/p
 
 ```shell
 pc cae cfd :pipe
+pc cae cfd -f poiseuille :pipe                       # one scenario of it, the one below
 pc cae cfd -i //pub/feature/cae/openfoam:cfd :pipe   # this implementation, for one run
 pc test -f cfd                                      # as a check that fails on any finding
 ```
@@ -12,7 +13,8 @@ pc test -f cfd                                      # as a check that fails on a
 ## What it computes
 
 The part is read as the **fluid volume**: a duct is analysed by declaring its bore as a part, not the
-casting around it. Its `cfd:` section says where the flow goes in and out:
+casting around it. Its `cfd:` section is a map of named scenarios, each saying where the flow goes in and
+out:
 
 ```yaml
 sketches:
@@ -37,10 +39,11 @@ parts:
       pipe-inlet: [[0, 0, -50], [0, 0, 1], 0]   # Z out of the end face
       pipe-outlet: [[0, 0, 50], [0, 0, 1], 0]
     cfd:
-      load:
-        pipe-inlet: 0.005 N  # what drives the flow in
-      outlet:
-        - pipe-outlet        # where it leaves, at the reference pressure
+      poiseuille:
+        load:
+          pipe-inlet: 0.005 N  # what drives the flow in
+        outlet:
+          - pipe-outlet        # where it leaves, at the reference pressure
 ```
 
 * **Inlets** are the ports under `load:`. The force over the area the port's sketch covers is the
@@ -54,7 +57,8 @@ is exactly as large as its sketch. A port with no sketch covers the face it lies
 
 What comes back:
 
-* `<part>.cfd.glb`, the part's boundary coloured by pressure, which the Digital Thread's CFD tab shows;
+* `<part>.cfd.<scenario>.glb`, the part's boundary coloured by pressure, which the Digital Thread's CFD
+  tab shows;
 * a measurement line in the log -- flow rate, mean outlet speed, peak speed, Reynolds number, the
   pressure each inlet was driven at, cell count, iterations to a steady state;
 * **findings**, which fail `pc test`: a flow that did not settle, a flow fast enough to be turbulent
@@ -88,7 +92,8 @@ conda-forge OpenFOAM v2412 (14,704 cells).
 
 ## Parameters
 
-Set in a `cae: cfd:` section of the package that uses this one, or of the part:
+Set in a `cae: cfd:` section of the package that uses this one, or of the part, or in one scenario's
+`params:`:
 
 | parameter | default | meaning |
 | --- | --- | --- |
