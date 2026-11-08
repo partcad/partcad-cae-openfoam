@@ -6,7 +6,7 @@ Steady, laminar, incompressible flow analysis for [PartCAD](https://github.com/p
 ```shell
 pc cae cfd :pipe
 pc cae cfd -i //pub/feature/cae/openfoam:cfd :pipe   # this implementation, for one run
-pc test -f cfd                                      # as a check that fails on any finding
+pc qual test -f cfd                                 # as a check that fails on any finding
 ```
 
 ## What it computes
@@ -57,9 +57,9 @@ What comes back:
 * `<part>.cfd.glb`, the part's boundary coloured by pressure, which the Digital Thread's CFD tab shows;
 * a measurement line in the log -- flow rate, mean outlet speed, peak speed, Reynolds number, the
   pressure each inlet was driven at, cell count, iterations to a steady state;
-* **findings**, which fail `pc test`: a flow that did not settle, a flow fast enough to be turbulent
-  (Reynolds number past 2300, where this laminar analysis stops applying), a speed past `max_velocity`,
-  and a flow rate short of `min_flow_rate` when that is set.
+* **findings**, which fail `pc qual test`: a flow that did not settle, a flow fast enough to be
+  turbulent (Reynolds number past 2300, where this laminar analysis stops applying), a speed past
+  `max_velocity`, and a flow rate short of `min_flow_rate` when that is set.
 
 ### The pipeline
 
