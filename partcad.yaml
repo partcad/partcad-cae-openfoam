@@ -13,7 +13,8 @@
 #     the `cfd:` keys (`load` in newtons, `outlet`, `fix`), and `boundary` -- the
 #     ports each condition landed on, with the faces of the part each covers.
 #   * It answers with `findings` beside `success`: what the analysis has to say
-#     about the part. An empty list is a pass, and is what `pc test` requires.
+#     about the part. An empty list is a pass, and is what `pc qual test`
+#     requires.
 
 name: //pub/feature/cae/openfoam
 desc: |
