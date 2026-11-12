@@ -71,7 +71,10 @@ cae:
     # //pub/std/manufacturing/material/fluid:water -- is solved as that fluid
     # instead: PartCAD hands this script its `density` and `viscosity`. A part
     # made of anything else hands a fluid analysis nothing, since the part is
-    # meshed as the fluid in it and its own density is not that fluid's.
+    # meshed as the fluid in it and its own density is not that fluid's. That
+    # is the PartCAD release that carries partcad/partcad#952; 0.10.14 up to it
+    # hands over the `density` of whatever the part is made of, solid or not,
+    # so there state `density` in the part's `cae:` section.
     density: 1.204
     viscosity: 1.82e-5
 
